@@ -1,0 +1,144 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #e5eefb;
+  background:
+    radial-gradient(circle at top, rgba(37, 99, 235, 0.24), transparent 35%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.app {
+  width: min(1100px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 48px;
+}
+
+.titulo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.titulo h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4.8rem);
+}
+
+.subtitulo {
+  max-width: 680px;
+  margin: 10px auto 0;
+  color: #cbd5e1;
+}
+
+.formulario,
+.post {
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 18px 50px rgba(2, 6, 23, 0.35);
+  backdrop-filter: blur(12px);
+}
+
+.formulario {
+  border-radius: 24px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.campos {
+  display: grid;
+  gap: 12px;
+}
+
+.campos input,
+.campos textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(30, 41, 59, 0.9);
+  color: #fff;
+  outline: none;
+}
+
+.campos textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.campos button,
+.copiar,
+.like {
+  border-radius: 14px;
+  padding: 12px 16px;
+  color: #fff;
+  background: #2563eb;
+}
+
+.posts {
+  margin-top: 18px;
+}
+
+.lista-posts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.post {
+  border-radius: 22px;
+  padding: 18px;
+}
+
+.post h2 {
+  margin-top: 0;
+}
+
+.post pre {
+  overflow-x: auto;
+  padding: 14px;
+  border-radius: 14px;
+  background: #020617;
+  color: #dbeafe;
+}
+
+.botones {
+  display: flex;
+  gap: 12px;
+}
+
+.botones .copiar,
+.botones .like {
+  flex: 1;
+}
