@@ -1,0 +1,32 @@
+# C / C++
+*.exe
+*.out
+*.o
+*.obj
+output/
+bin/
+
+# Java
+*.class
+.metadata/
+.settings/
+.classpath
+.project
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQL
+**/sql
