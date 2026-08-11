@@ -1,0 +1,192 @@
+
+<style>
+  .c16{width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:10px;border:0.5px solid var(--color-border-tertiary);border-radius:2px;transition:background 0.12s;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-mono);}
+  .c16.ha{background:#AFA9EC;color:#3C3489;}
+  .c16.hb{background:#5DCAA5;color:#085041;}
+  .c16.he{background:#F09595;color:#791F1F;}
+  .c16.hk{background:#F1EFE8;}
+  .c16.br{border-right:2px solid var(--color-border-primary);}
+  .c16.bb{border-bottom:2px solid var(--color-border-primary);}
+  .btn16{padding:5px 10px;font-size:11px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;}
+  .btn16:hover{background:var(--color-background-secondary);}
+  .btn16:disabled{opacity:0.4;cursor:default;}
+</style>
+
+<h2 class="sr-only">Visualizador del validador sudoku 16x16</h2>
+
+<div style="padding:1rem 0">
+<div style="display:flex;gap:8px;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+  <label style="font-size:11px;color:var(--color-text-secondary)">Modo:</label>
+  <select id="mS" style="font-size:11px;padding:3px 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)">
+    <option value="horizontal">Horizontal</option>
+    <option value="vertical">Vertical</option>
+    <option value="subcuadro">Subcuadro</option>
+  </select>
+  <label style="font-size:11px;color:var(--color-text-secondary)">Tablero:</label>
+  <select id="bS" style="font-size:11px;padding:3px 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)">
+    <option value="valid">Válido</option>
+    <option value="inv_row">Error en fila</option>
+    <option value="inv_col">Error en columna</option>
+    <option value="inv_sub">Error en subcuadro</option>
+  </select>
+</div>
+
+<div id="g16" style="display:grid;grid-template-columns:repeat(16,28px);gap:2px;margin-bottom:1rem"></div>
+
+<div style="display:flex;gap:6px;margin-bottom:0.75rem;flex-wrap:wrap;align-items:center">
+  <button class="btn16" id="bP" disabled>← Anterior</button>
+  <button class="btn16" id="bN">Siguiente →</button>
+  <button class="btn16" id="bA">▶ Auto</button>
+  <button class="btn16" id="bR">↺ Reset</button>
+</div>
+
+<div id="inf" style="font-size:11px;font-family:var(--font-mono);color:var(--color-text-secondary);margin-bottom:6px;min-height:16px"></div>
+<div id="res" style="font-size:11px;padding:4px 10px;border-radius:var(--border-radius-md);display:none;margin-bottom:10px"></div>
+
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+  <span style="font-size:11px;color:var(--color-text-secondary)"><span style="display:inline-block;width:12px;height:12px;background:#AFA9EC;border-radius:2px;vertical-align:middle;margin-right:3px"></span>elemento fijo</span>
+  <span style="font-size:11px;color:var(--color-text-secondary)"><span style="display:inline-block;width:12px;height:12px;background:#5DCAA5;border-radius:2px;vertical-align:middle;margin-right:3px"></span>comparado</span>
+  <span style="font-size:11px;color:var(--color-text-secondary)"><span style="display:inline-block;width:12px;height:12px;background:#F09595;border-radius:2px;vertical-align:middle;margin-right:3px"></span>duplicado</span>
+  <span style="font-size:11px;color:var(--color-text-secondary)"><span style="display:inline-block;width:12px;height:12px;background:#F1EFE8;border-radius:2px;vertical-align:middle;margin-right:3px"></span>subcuadro activo</span>
+</div>
+</div>
+
+<script>
+const N=16,K=4;
+
+function makeValid(){
+  const b=[];
+  for(let i=0;i<N;i++){
+    b.push([]);
+    for(let j=0;j<N;j++)
+      b[i].push((i*K+Math.floor(i/K)+j)%N+1);
+  }
+  return b;
+}
+
+function makeLatin(){
+  const b=[];
+  for(let i=0;i<N;i++){
+    b.push([]);
+    for(let j=0;j<N;j++)
+      b[i].push((i+j)%N+1);
+  }
+  return b;
+}
+
+function getBoard(key){
+  if(key==='valid') return makeValid();
+  if(key==='inv_sub') return makeLatin();
+  const b=makeValid();
+  if(key==='inv_row'){ b[0][4]=b[0][0]; }
+  if(key==='inv_col'){ b[4][0]=b[0][0]; }
+  return b;
+}
+
+let board,steps=[],cur=0,autoT=null;
+
+function buildSteps(mode,b){
+  const s=[];
+  if(mode==='horizontal'){
+    for(let i=0;i<N;i++)
+      for(let j=0;j<N-1;j++)
+        for(let c=j+1;c<N;c++){
+          const eq=b[i][j]===b[i][c];
+          s.push({a:[i,j],bv:[i,c],eq,label:`fila ${i} — [${i}][${j}]=${b[i][j]} vs [${i}][${c}]=${b[i][c]}`});
+          if(eq){s[s.length-1].stop=true;return s;}
+        }
+  } else if(mode==='vertical'){
+    for(let i=0;i<N;i++)
+      for(let j=0;j<N-1;j++)
+        for(let c=j+1;c<N;c++){
+          const eq=b[j][i]===b[c][i];
+          s.push({a:[j,i],bv:[c,i],eq,label:`col ${i} — [${j}][${i}]=${b[j][i]} vs [${c}][${i}]=${b[c][i]}`});
+          if(eq){s[s.length-1].stop=true;return s;}
+        }
+  } else {
+    for(let i=0;i<N;i+=K)
+      for(let j=0;j<N;j+=K)
+        for(let r=i;r<i+K;r++)
+          for(let c=j;c<j+K;c++)
+            for(let a=r;a<i+K;a++)
+              for(let bx=(a===r?c+1:j);bx<j+K;bx++){
+                const eq=b[r][c]===b[a][bx];
+                s.push({a:[r,c],bv:[a,bx],eq,label:`bloque(${i},${j}) — [${r}][${c}]=${b[r][c]} vs [${a}][${bx}]=${b[a][bx]}`,block:[i,j]});
+                if(eq){s[s.length-1].stop=true;return s;}
+              }
+  }
+  return s;
+}
+
+function renderGrid(step){
+  const g=document.getElementById('g16');
+  g.innerHTML='';
+  const mode=document.getElementById('mS').value;
+  for(let i=0;i<N;i++)
+    for(let j=0;j<N;j++){
+      const d=document.createElement('div');
+      let cls='c16';
+      if((j+1)%K===0&&j<N-1) cls+=' br';
+      if((i+1)%K===0&&i<N-1) cls+=' bb';
+      d.textContent=board[i][j];
+      if(step){
+        const [ar,ac]=step.a,[br2,bc]=step.bv;
+        const isA=i===ar&&j===ac,isB=i===br2&&j===bc;
+        if(step.eq&&(isA||isB)) cls+=' he';
+        else if(isA) cls+=' ha';
+        else if(isB) cls+=' hb';
+        else if(mode==='subcuadro'&&step.block){
+          const [bi,bj]=step.block;
+          if(i>=bi&&i<bi+K&&j>=bj&&j<bj+K) cls+=' hk';
+        }
+      }
+      d.className=cls;
+      g.appendChild(d);
+    }
+}
+
+function showStep(idx){
+  const info=document.getElementById('inf');
+  const res=document.getElementById('res');
+  res.style.display='none';
+  if(idx<0||steps.length===0){renderGrid(null);info.textContent='';return;}
+  const s=steps[Math.min(idx,steps.length-1)];
+  renderGrid(s);
+  info.textContent=`Paso ${idx+1} / ${steps.length}  |  ${s.label}`;
+  if(s.eq){
+    res.style.display='block';res.style.background='#FCEBEB';res.style.color='#791F1F';
+    res.textContent='✗ Duplicado encontrado → retorna 0 (inválido)';
+  } else if(idx===steps.length-1&&!s.stop){
+    res.style.display='block';res.style.background='#EAF3DE';res.style.color='#27500A';
+    res.textContent='✓ Sin duplicados → retorna 1 (válido)';
+  }
+  document.getElementById('bP').disabled=idx===0;
+  document.getElementById('bN').disabled=idx>=steps.length-1||!!s.stop;
+}
+
+function rebuild(){
+  stopAuto();
+  board=getBoard(document.getElementById('bS').value);
+  steps=buildSteps(document.getElementById('mS').value,board);
+  cur=0;showStep(0);
+}
+
+function stopAuto(){
+  if(autoT){clearInterval(autoT);autoT=null;document.getElementById('bA').textContent='▶ Auto';}
+}
+
+document.getElementById('bN').onclick=()=>{stopAuto();if(cur<steps.length-1&&!steps[cur].stop){cur++;showStep(cur);}};
+document.getElementById('bP').onclick=()=>{stopAuto();if(cur>0){cur--;showStep(cur);}};
+document.getElementById('bR').onclick=()=>{stopAuto();cur=0;showStep(0);};
+document.getElementById('bA').onclick=function(){
+  if(autoT){stopAuto();return;}
+  this.textContent='⏸ Pausar';
+  autoT=setInterval(()=>{
+    if(cur>=steps.length-1||steps[cur].stop){stopAuto();return;}
+    cur++;showStep(cur);
+  },150);
+};
+document.getElementById('mS').onchange=rebuild;
+document.getElementById('bS').onchange=rebuild;
+rebuild();
+</script>

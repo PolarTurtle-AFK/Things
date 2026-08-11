@@ -1,0 +1,200 @@
+
+<style>
+  .cell9{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;border:0.5px solid var(--color-border-tertiary);border-radius:3px;transition:background 0.15s,color 0.15s;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-mono);}
+  .cell9.hl-a{background:#AFA9EC;color:#3C3489;}
+  .cell9.hl-b{background:#5DCAA5;color:#085041;}
+  .cell9.hl-err{background:#F09595;color:#791F1F;}
+  .cell9.hl-block{background:#F1EFE8;}
+  .cell9.border-r{border-right:2px solid var(--color-border-primary);}
+  .cell9.border-b{border-bottom:2px solid var(--color-border-primary);}
+  .btn9{padding:6px 12px;font-size:12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;}
+  .btn9:hover{background:var(--color-background-secondary);}
+  .btn9:disabled{opacity:0.4;cursor:default;}
+  .tag9{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-family:var(--font-mono);}
+</style>
+
+<h2 class="sr-only">Visualizador del validador sudoku 9x9 paso a paso</h2>
+
+<div style="padding:1rem 0">
+
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+  <label style="font-size:12px;color:var(--color-text-secondary)">Modo:</label>
+  <select id="modeS" style="font-size:12px;padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)">
+    <option value="horizontal">Horizontal</option>
+    <option value="vertical">Vertical</option>
+    <option value="subcuadro">Subcuadro</option>
+  </select>
+  <label style="font-size:12px;color:var(--color-text-secondary)">Tablero:</label>
+  <select id="boardS" style="font-size:12px;padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary)">
+    <option value="valid">Válido</option>
+    <option value="inv_row">Error en fila</option>
+    <option value="inv_col">Error en columna</option>
+    <option value="inv_sub">Error en subcuadro</option>
+  </select>
+</div>
+
+<div id="grid9" style="display:grid;grid-template-columns:repeat(9,36px);gap:2px;margin-bottom:1rem"></div>
+
+<div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;align-items:center">
+  <button class="btn9" id="bPrev" disabled>← Anterior</button>
+  <button class="btn9" id="bNext">Siguiente →</button>
+  <button class="btn9" id="bAuto">▶ Auto</button>
+  <button class="btn9" id="bReset">↺ Reset</button>
+  <span id="stepCounter" style="font-size:11px;color:var(--color-text-secondary)"></span>
+</div>
+
+<div id="info9" style="font-size:12px;font-family:var(--font-mono);color:var(--color-text-secondary);margin-bottom:8px;min-height:18px"></div>
+<div id="res9" style="font-size:12px;padding:5px 10px;border-radius:var(--border-radius-md);display:none;margin-bottom:10px"></div>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+  <span><span class="tag9" style="background:#EEEDFE;color:#3C3489">A</span> <span style="font-size:11px;color:var(--color-text-secondary)">elemento fijo</span></span>
+  <span><span class="tag9" style="background:#E1F5EE;color:#085041">B</span> <span style="font-size:11px;color:var(--color-text-secondary)">comparado</span></span>
+  <span><span class="tag9" style="background:#FCEBEB;color:#791F1F">error</span> <span style="font-size:11px;color:var(--color-text-secondary)">duplicado</span></span>
+  <span><span class="tag9" style="background:#F1EFE8;color:#444441">█</span> <span style="font-size:11px;color:var(--color-text-secondary)">subcuadro activo</span></span>
+</div>
+</div>
+
+<script>
+const VALID = [
+  [5,3,4,6,7,8,9,1,2],
+  [6,7,2,1,9,5,3,4,8],
+  [1,9,8,3,4,2,5,6,7],
+  [8,5,9,7,6,1,4,2,3],
+  [4,2,6,8,5,3,7,9,1],
+  [7,1,3,9,2,4,8,5,6],
+  [9,6,1,5,3,7,2,8,4],
+  [2,8,7,4,1,9,6,3,5],
+  [3,4,5,2,8,6,1,7,9]
+];
+const INV_ROW = VALID.map(r=>[...r]);
+INV_ROW[0][2] = 3;
+
+const INV_COL = VALID.map(r=>[...r]);
+INV_COL[3][0] = 5;
+
+const INV_SUB = [
+  [1,2,3,4,5,6,7,8,9],
+  [2,3,4,5,6,7,8,9,1],
+  [3,4,5,6,7,8,9,1,2],
+  [4,5,6,7,8,9,1,2,3],
+  [5,6,7,8,9,1,2,3,4],
+  [6,7,8,9,1,2,3,4,5],
+  [7,8,9,1,2,3,4,5,6],
+  [8,9,1,2,3,4,5,6,7],
+  [9,1,2,3,4,5,6,7,8]
+];
+
+const BOARDS = {valid:VALID,inv_row:INV_ROW,inv_col:INV_COL,inv_sub:INV_SUB};
+const N=9,K=3;
+let board,steps=[],cur=0,autoT=null;
+
+function buildSteps(mode,b){
+  const s=[];
+  if(mode==='horizontal'){
+    for(let i=0;i<N;i++)
+      for(let j=0;j<N-1;j++)
+        for(let c=j+1;c<N;c++){
+          const eq=b[i][j]===b[i][c];
+          s.push({a:[i,j],bv:[i,c],eq,label:`fila ${i} — [${i}][${j}]=${b[i][j]} vs [${i}][${c}]=${b[i][c]}`});
+          if(eq){s[s.length-1].stop=true;return s;}
+        }
+  } else if(mode==='vertical'){
+    for(let i=0;i<N;i++)
+      for(let j=0;j<N-1;j++)
+        for(let c=j+1;c<N;c++){
+          const eq=b[j][i]===b[c][i];
+          s.push({a:[j,i],bv:[c,i],eq,label:`col ${i} — [${j}][${i}]=${b[j][i]} vs [${c}][${i}]=${b[c][i]}`});
+          if(eq){s[s.length-1].stop=true;return s;}
+        }
+  } else {
+    for(let i=0;i<N;i+=K)
+      for(let j=0;j<N;j+=K)
+        for(let r=i;r<i+K;r++)
+          for(let c=j;c<j+K;c++)
+            for(let a=r;a<i+K;a++)
+              for(let bx=(a===r?c+1:j);bx<j+K;bx++){
+                const eq=b[r][c]===b[a][bx];
+                s.push({a:[r,c],bv:[a,bx],eq,label:`bloque(${i},${j}) — [${r}][${c}]=${b[r][c]} vs [${a}][${bx}]=${b[a][bx]}`,block:[i,j]});
+                if(eq){s[s.length-1].stop=true;return s;}
+              }
+  }
+  return s;
+}
+
+function renderGrid(step){
+  const g=document.getElementById('grid9');
+  g.innerHTML='';
+  const mode=document.getElementById('modeS').value;
+  for(let i=0;i<N;i++)
+    for(let j=0;j<N;j++){
+      const d=document.createElement('div');
+      let cls='cell9';
+      if((j+1)%3===0&&j<8) cls+=' border-r';
+      if((i+1)%3===0&&i<8) cls+=' border-b';
+      d.className=cls;
+      d.textContent=board[i][j];
+      if(step){
+        const [ar,ac]=step.a,[br2,bc]=step.bv;
+        const isA=i===ar&&j===ac,isB=i===br2&&j===bc;
+        if(step.eq&&(isA||isB)) d.className=cls.replace('cell9','cell9 hl-err');
+        else if(isA) d.className=cls.replace('cell9','cell9 hl-a');
+        else if(isB) d.className=cls.replace('cell9','cell9 hl-b');
+        else if(mode==='subcuadro'&&step.block){
+          const [bi,bj]=step.block;
+          if(i>=bi&&i<bi+K&&j>=bj&&j<bj+K) d.className=cls.replace('cell9','cell9 hl-block');
+        }
+      }
+      g.appendChild(d);
+    }
+}
+
+function showStep(idx){
+  const info=document.getElementById('info9');
+  const res=document.getElementById('res9');
+  const ctr=document.getElementById('stepCounter');
+  res.style.display='none';
+  if(idx<0||steps.length===0){renderGrid(null);info.textContent='';ctr.textContent='';return;}
+  const s=steps[Math.min(idx,steps.length-1)];
+  renderGrid(s);
+  info.textContent=`Paso ${idx+1} / ${steps.length}  |  ${s.label}`;
+  ctr.textContent='';
+  if(s.eq){
+    res.style.display='block';
+    res.style.background='#FCEBEB';res.style.color='#791F1F';
+    res.textContent='✗ Duplicado encontrado → retorna 0 (inválido)';
+  } else if(idx===steps.length-1&&!s.stop){
+    res.style.display='block';
+    res.style.background='#EAF3DE';res.style.color='#27500A';
+    res.textContent='✓ Sin duplicados → retorna 1 (válido)';
+  }
+  document.getElementById('bPrev').disabled=idx===0;
+  document.getElementById('bNext').disabled=idx>=steps.length-1||!!s.stop;
+}
+
+function rebuild(){
+  stopAuto();
+  board=BOARDS[document.getElementById('boardS').value].map(r=>[...r]);
+  steps=buildSteps(document.getElementById('modeS').value,board);
+  cur=0;
+  showStep(0);
+}
+
+function stopAuto(){
+  if(autoT){clearInterval(autoT);autoT=null;document.getElementById('bAuto').textContent='▶ Auto';}
+}
+
+document.getElementById('bNext').onclick=()=>{stopAuto();if(cur<steps.length-1&&!steps[cur].stop){cur++;showStep(cur);}};
+document.getElementById('bPrev').onclick=()=>{stopAuto();if(cur>0){cur--;showStep(cur);}};
+document.getElementById('bReset').onclick=()=>{stopAuto();cur=0;showStep(0);};
+document.getElementById('bAuto').onclick=function(){
+  if(autoT){stopAuto();return;}
+  this.textContent='⏸ Pausar';
+  autoT=setInterval(()=>{
+    if(cur>=steps.length-1||steps[cur].stop){stopAuto();return;}
+    cur++;showStep(cur);
+  },300);
+};
+document.getElementById('modeS').onchange=rebuild;
+document.getElementById('boardS').onchange=rebuild;
+rebuild();
+</script>
