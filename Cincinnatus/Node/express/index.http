@@ -1,0 +1,36 @@
+POST http://localhost:3000/api/cursos/programacion HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 2,
+    "titulo": "Curso de Node.js",
+    "lenguaje": "Node",
+    "vistas": 1500,
+    "nivel": "Intermedio"
+}
+
+###
+
+PUT http://localhost:3000/api/cursos/programacion/2 HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 2,
+    "titulo": "Curso de JavaScript Avanzado",
+    "lenguaje": "JavaScript",
+    "vistas": 0,
+    "nivel": "Avanzado"
+}
+
+###
+
+PATCH http://localhost:3000/api/cursos/programacion/2 HTTP/1.1
+Content-Type: application/json
+
+{
+    "vistas": 2000
+}
+
+### 
+
+DELETE http://localhost:3000/api/cursos/programacion/2 HTTP/1.1
