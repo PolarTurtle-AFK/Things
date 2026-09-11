@@ -2,12 +2,6 @@
 
 A simple platform where users can upload, copy, and like programming resources.
 
-## Features
-
-- Upload code snippets
-- Copy useful resources
-- Like shared content
-
 ## Built With
 
 - React
@@ -17,20 +11,23 @@ A simple platform where users can upload, copy, and like programming resources.
 
 ## How to Run
 
-1. Clone the repository:
+# 1. Clone the repository:
 
 ```bash
 git clone https://github.com/PolarTurtle-AFK/Codehub.git
 ```
+```bash
+cd Codehub
+```
 
-2. cd Codehub
-
-3. Install dependencies:
+# 2. Install dependencies:
 
 ```bash
 npm install
-Start the development server:
-npm run dev
+```
+# 3. Run
+```bash
+npm start
 ```
 
 ## Author
