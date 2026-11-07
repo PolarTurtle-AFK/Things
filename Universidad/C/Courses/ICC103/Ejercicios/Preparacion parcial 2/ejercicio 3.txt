@@ -1,0 +1,12 @@
+3. Memoria dinámica: estructura
+Una biblioteca guarda sus préstamos. Defina las estructuras:
+
+Libro: código (6 caracteres), título (40) y cantidad de ejemplares disponibles (entero).
+Préstamo: código del libro (6), carnet del estudiante (9) y días de retraso (entero, 0 si no hay retraso).
+
+Realice una función char *carnet_mayor_retraso(Prestamo *p, int np, Libro *l, int nl), que reciba los préstamos y el catálogo, y retorne el carnet del estudiante con más días de retraso acumulados (sumando todos sus préstamos). Solo cuentan los préstamos cuyo libro exista en el catálogo; los demás se ignoran. Si nadie tiene retraso mayor que 0, retorna NULL.
+
+Préstamos: 2 de "mike" (3 y 4 días), 1 de "will" (6 días)  -> Carnet: mike (7 > 6)
+Préstamo con libro que no está en el catálogo -> se ignora
+Todos con 0 días  -> (sin retrasos)
+

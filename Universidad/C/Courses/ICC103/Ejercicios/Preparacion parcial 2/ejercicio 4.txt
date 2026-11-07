@@ -1,0 +1,7 @@
+4. Archivos
+Con la estructura Prestamo del ejercicio 3, existe un archivo binario prestamos.dat. Realice una función int depurar(char *archivo, char *carnet) que elimine del archivo todos los préstamos de ese estudiante que ya no tengan retraso (días = 0), dejando los demás intactos y en el mismo orden. Además, debe escribir en depurados.txt (texto, agregando al final) una línea por cada préstamo eliminado con el formato carnet;libro. Retorna la cantidad eliminada, o -1 si hay error al abrir el archivo.
+
+prestamos.dat antes: 5 registros, 2 de "mike" con 0 días
+depurar("prestamos.dat","mike") retorna 2
+prestamos.dat después: 3 registros | depurados.txt: dos líneas nuevas
+depurar("noexiste.dat","mike") retorna -1

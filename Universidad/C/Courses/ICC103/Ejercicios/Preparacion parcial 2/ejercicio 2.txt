@@ -1,0 +1,13 @@
+2. Memoria dinámica: cadena
+Un editor de texto necesita normalizar frases. Realice una función char *normalizar(char *frase) que retorne una nueva cadena donde:
+
+se eliminan los espacios al inicio y al final,
+varios espacios seguidos quedan como uno solo,
+la primera letra de cada palabra queda en mayúscula y las demás en minúscula.
+
+La memoria debe ajustarse al tamaño exacto y la frase original no se modifica. Si la frase solo tiene espacios o está vacía, retorna una cadena vacía (no NULL).
+
+Original:   "   hOLA    mUNDO  cruel "   Normalizada: "Hola Mundo Cruel"
+Original:   "ya"                          Normalizada: "Ya"
+Original:   "      "                      Normalizada: ""
+
